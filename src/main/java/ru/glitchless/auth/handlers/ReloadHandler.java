@@ -22,5 +22,13 @@ public class ReloadHandler {
                 return true;
             }
         });
+
+        event.getRegistry().registerServerReloadHandler(new ResourceLocation(GlitchlessAuth.MODID, "gl_wl"), new IReloadHandler() {
+            @Override
+            public boolean onReload(ServerReloadEvent serverReloadEvent) throws Exception {
+                GlitchlessAuth.getInstance().getUpdateLooper().forceUpdate();
+                return true;
+            }
+        });
     }
 }

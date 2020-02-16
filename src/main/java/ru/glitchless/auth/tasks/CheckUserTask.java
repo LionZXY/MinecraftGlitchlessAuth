@@ -28,12 +28,10 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 public class CheckUserTask implements Runnable {
-    private static final Gson gson = new GsonBuilder().create();
     @SuppressWarnings("UnstableApiUsage")
     private static final Type PROFILE_TYPE = new TypeToken<ApiResponse<UserProfile>>() {
     }.getType();
     private static final String BASE_URL = "https://games.glitchless.ru/api/minecraft/users/profile/?token=%s&nickname=%s";
-    private static final OkHttpClient client = new OkHttpClient.Builder().build();
     private final GameProfile profile;
     private final EntityPlayer player;
 
@@ -49,7 +47,7 @@ public class CheckUserTask implements Runnable {
                 .build();
         ApiResponse<UserProfile> result;
         try {
-            result = gson.fromJson(makeRequest(request), PROFILE_TYPE);
+            result = GlitchlessAuth.getGson().fromJson(makeRequest(request), PROFILE_TYPE);
         } catch (Exception ex) {
             GlitchlessAuth.getLogger().error("Error getting " + request.url(), ex);
             return;
@@ -77,16 +75,14 @@ public class CheckUserTask implements Runnable {
             sb.append(plrRank.getId());
         }
 
-        final TextComponentBase text = TextComponentHelper
-                .createComponentTranslation(player, "glitchlessauth.rankjoined", sb.toString());
-        player.sendMessage(text);
+        player.sendMessage(new TextComponentString(String.format("Ваши текущие группы: %s", sb.toString())));
         Ranks.INSTANCE.save();
 
         GlitchlessAuth.getLogger().info("Add to user " + profile.getName() + " " + sb);
     }
 
     private String makeRequest(Request request) throws IOException {
-        try (Response response = client.newCall(request).execute()) {
+        try (Response response = GlitchlessAuth.getClient().newCall(request).execute()) {
             return Objects.requireNonNull(response.body()).string();
         }
     }
