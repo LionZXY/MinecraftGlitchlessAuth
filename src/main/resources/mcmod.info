@@ -1,0 +1,16 @@
+[
+{
+  "modid": "glitchlessauth",
+  "name": "Glitchless Auth",
+  "description": "Mod for Glitchless group.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["LionZXY"],
+  "credits": "The Forge and FML guys, for making forge",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
