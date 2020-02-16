@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 public class UpdateLooper extends Thread {
     private UpdateWhiteListTask updateWhiteListTask = new UpdateWhiteListTask();
-    private long updateWhiteListDelay = TimeUnit.SECONDS.convert(30, TimeUnit.MILLISECONDS);
+    private long updateWhiteListDelay = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
     private final Object lockWait = new Object();
 
     @Override

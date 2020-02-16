@@ -27,7 +27,7 @@ public class UpdateWhiteListTask implements Runnable {
 
     @Override
     public void run() {
-        GlitchlessAuth.getLogger().debug("Run UpdateWhiteListTask");
+        GlitchlessAuth.getLogger().info("Run UpdateWhiteListTask");
         syncWhiteList();
     }
 
@@ -63,7 +63,12 @@ public class UpdateWhiteListTask implements Runnable {
             return;
         }
 
+        GlitchlessAuth.getLogger().info(String.format("Find to remove %s users and %s to add (whitelist)",
+                onlineWhiteList.size(), toRemove.size()));
+
         GlitchlessAuth.getInstance().getMainLooper().handle(() -> {
+            GlitchlessAuth.getLogger().info(String.format("Remove %s users and %s add to whitelist",
+                    onlineWhiteList.size(), toRemove.size()));
             for (GameProfile toRemoveProfile : toRemove) {
                 playerList.removePlayerFromWhitelist(toRemoveProfile);
                 kickUser(toRemoveProfile.getId());
