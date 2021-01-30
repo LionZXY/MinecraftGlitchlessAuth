@@ -34,7 +34,7 @@ public class UpdateWhiteListTask implements Runnable {
     }
 
     private static synchronized void syncWhiteList() {
-        final String url = String.format(BASE_URL, GlitchlessGroupConfig.server_token);
+        final String url = String.format(BASE_URL, GlitchlessGroupConfig.INSTANCE.serverToken.get());
         final Request request = new Request.Builder().url(url).build();
         final ApiResponse<WhiteListModel> whiteListModel;
         try (Response response = GlitchlessAuth.getClient().newCall(request).execute()) {

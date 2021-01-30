@@ -31,13 +31,13 @@ public class RankMap {
     }
 
     private static void invalidateIfNeed() {
-        int newHash = GlitchlessGroupConfig.id_to_rank.hashCode();
+        int newHash = GlitchlessGroupConfig.INSTANCE.idToRank.get().hashCode();
         if (lastCacheInvalidateHash == newHash) {
             return;
         }
 
         idToRank.clear();
-        for (String element : GlitchlessGroupConfig.id_to_rank) {
+        for (String element : GlitchlessGroupConfig.INSTANCE.idToRank.get()) {
             final String[] idRankSplit = element.split(":");
             idToRank.put(Integer.parseInt(idRankSplit[0]), idRankSplit[1]);
         }

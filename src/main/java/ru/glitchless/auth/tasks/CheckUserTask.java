@@ -36,8 +36,11 @@ public class CheckUserTask implements Runnable {
     @Override
     public void run() {
         final Request request = new Request.Builder()
-                .url(String.format(BASE_URL, GlitchlessGroupConfig.server_token, profile.getName()))
-                .build();
+                .url(String.format(
+                        BASE_URL,
+                        GlitchlessGroupConfig.INSTANCE.serverToken.get(),
+                        profile.getName()
+                )).build();
         ApiResponse<UserProfile> result;
         try {
             result = GlitchlessAuth.getGson().fromJson(makeRequest(request), PROFILE_TYPE);
