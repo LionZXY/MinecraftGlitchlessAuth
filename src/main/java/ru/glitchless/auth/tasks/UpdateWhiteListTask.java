@@ -2,11 +2,13 @@ package ru.glitchless.auth.tasks;
 
 import com.google.common.reflect.TypeToken;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.server.management.UserListEntryWrapper;
+import net.minecraft.server.management.WhitelistEntry;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.glitchless.auth.GlitchlessAuth;
@@ -47,15 +49,17 @@ public class UpdateWhiteListTask implements Runnable {
                     new GameProfile(UUIDUtils.formatFromInput(playerProfile.getUuid()), playerProfile.getNickname()));
         }
 
-        final PlayerList playerList = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList();
 
-        final String[] currentWhiteList = playerList.getWhitelistedPlayers().getKeys();
+        final PlayerList playerList = ServerLifecycleHooks.getCurrentServer().getPlayerList();
+
+        final List<WhitelistEntry> currentWhiteList = new ArrayList<>(playerList.getWhitelistedPlayers().getEntries());
         final List<GameProfile> toRemove = new ArrayList<>();
 
-        for (String name : currentWhiteList) {
-            final GameProfile profile = onlineWhiteList.remove(name);
-            if (profile == null) {
-                toRemove.add(playerList.getWhitelistedPlayers().getByName(name));
+        for (WhitelistEntry entry : currentWhiteList) {
+            final GameProfile profile = new UserListEntryWrapper<>(entry).getValue();
+            final GameProfile thisUserExistInNewWL = onlineWhiteList.remove(profile.getName());
+            if (thisUserExistInNewWL == null) {
+                toRemove.add(profile);
             }
         }
 
@@ -70,26 +74,26 @@ public class UpdateWhiteListTask implements Runnable {
             GlitchlessAuth.getLogger().info(String.format("Remove %s users and %s add to whitelist",
                     onlineWhiteList.size(), toRemove.size()));
             for (GameProfile toRemoveProfile : toRemove) {
-                playerList.removePlayerFromWhitelist(toRemoveProfile);
+                playerList.getWhitelistedPlayers().removeEntry(toRemoveProfile);
                 kickUser(toRemoveProfile.getId());
             }
             for (GameProfile toAddProfile : onlineWhiteList.values()) {
-                playerList.addWhitelistedPlayer(toAddProfile);
+                playerList.getWhitelistedPlayers().addEntry(new WhitelistEntry(toAddProfile));
             }
         });
     }
 
     private static void kickUser(UUID uuid) {
-        final PlayerList playerList = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList();
-        final EntityPlayerMP playerMP = playerList.getPlayerByUUID(uuid);
+        final PlayerList playerList = ServerLifecycleHooks.getCurrentServer().getPlayerList();
+        final ServerPlayerEntity playerMP = playerList.getPlayerByUUID(uuid);
         //noinspection ConstantConditions
         if (playerMP == null) {
             return;
         }
-        final NetHandlerPlayServer connection = playerMP.connection;
+        final ServerPlayNetHandler connection = playerMP.connection;
         if (connection == null) {
             return;
         }
-        connection.disconnect(new TextComponentString("Вы были исключены из белого списка"));
+        connection.disconnect(new StringTextComponent("Вы были исключены из белого списка"));
     }
 }
