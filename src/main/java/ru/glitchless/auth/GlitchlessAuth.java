@@ -31,7 +31,7 @@ public class GlitchlessAuth {
     private UpdateLooper updateLooper = new UpdateLooper();
 
     public GlitchlessAuth() {
-        this.INSTANCE = this;
+        INSTANCE = this;
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON,
                 GlitchlessGroupConfig.INSTANCE_SPEC);
         MinecraftForge.EVENT_BUS.register(this);
