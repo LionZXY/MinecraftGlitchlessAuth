@@ -4,11 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
 import okhttp3.OkHttpClient;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.glitchless.auth.config.GlitchlessGroupConfig;
@@ -32,6 +35,7 @@ public class GlitchlessAuth {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON,
                 GlitchlessGroupConfig.INSTANCE_SPEC);
         MinecraftForge.EVENT_BUS.register(this);
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
     }
 
     public static Logger getLogger() {
@@ -41,6 +45,7 @@ public class GlitchlessAuth {
     @SubscribeEvent
     public void preInit(FMLServerStartingEvent event) {
         MinecraftForge.EVENT_BUS.register(mainLooper);
+        updateLooper.start();
     }
 
     public static GlitchlessAuth getInstance() {

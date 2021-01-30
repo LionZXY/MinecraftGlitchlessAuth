@@ -1,5 +1,7 @@
 package net.minecraft.server.management;
 
+import javax.annotation.Nullable;
+
 public class UserListEntryWrapper<T> {
     private final UserListEntry<T> wrappedValue;
 
@@ -7,7 +9,8 @@ public class UserListEntryWrapper<T> {
         this.wrappedValue = wrappedValue;
     }
 
+    @Nullable
     public T getValue() {
-        return getValue();
+        return wrappedValue.getValue();
     }
 }

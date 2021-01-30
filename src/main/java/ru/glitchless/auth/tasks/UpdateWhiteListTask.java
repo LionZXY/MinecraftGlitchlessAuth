@@ -57,6 +57,9 @@ public class UpdateWhiteListTask implements Runnable {
 
         for (WhitelistEntry entry : currentWhiteList) {
             final GameProfile profile = new UserListEntryWrapper<>(entry).getValue();
+            if (profile == null) {
+                break;
+            }
             final GameProfile thisUserExistInNewWL = onlineWhiteList.remove(profile.getName());
             if (thisUserExistInNewWL == null) {
                 toRemove.add(profile);
@@ -68,11 +71,11 @@ public class UpdateWhiteListTask implements Runnable {
         }
 
         GlitchlessAuth.getLogger().info(String.format("Find to remove %s users and %s to add (whitelist)",
-                onlineWhiteList.size(), toRemove.size()));
+                toRemove.size(), onlineWhiteList.size()));
 
         GlitchlessAuth.getInstance().getMainLooper().handle(() -> {
             GlitchlessAuth.getLogger().info(String.format("Remove %s users and %s add to whitelist",
-                    onlineWhiteList.size(), toRemove.size()));
+                    toRemove.size(), onlineWhiteList.size()));
             for (GameProfile toRemoveProfile : toRemove) {
                 playerList.getWhitelistedPlayers().removeEntry(toRemoveProfile);
                 kickUser(toRemoveProfile.getId());
