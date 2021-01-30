@@ -1,7 +1,7 @@
 package ru.glitchless.auth.config;
 
-import com.feed_the_beast.ftbutilities.ranks.Rank;
-import com.feed_the_beast.ftbutilities.ranks.Ranks;
+import com.feed_the_beast.mods.ftbranks.api.FTBRanksAPI;
+import com.feed_the_beast.mods.ftbranks.api.Rank;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -12,10 +12,11 @@ public class RankMap {
     private static int lastCacheInvalidateHash = 0;
 
     @Nullable
-    public static synchronized Rank getRankById(Integer id) {
+    public static synchronized Optional<Rank> getRankById(Integer id) {
         invalidateIfNeed();
         final String name = idToRank.get(id);
-        return Ranks.INSTANCE.getRank(name);
+
+        return FTBRanksAPI.INSTANCE.getManager().getRank(name);
     }
 
     @Nonnull
@@ -23,16 +24,14 @@ public class RankMap {
         invalidateIfNeed();
         final List<Rank> toExit = new ArrayList<>();
         for (Integer id : ids) {
-            final Rank rank = Ranks.INSTANCE.getRank(idToRank.get(id));
-            if (rank != null) {
-                toExit.add(rank);
-            }
+            final Optional<Rank> rank = FTBRanksAPI.INSTANCE.getManager().getRank(idToRank.get(id));
+            rank.ifPresent(toExit::add);
         }
         return toExit;
     }
 
     private static void invalidateIfNeed() {
-        int newHash = Arrays.hashCode(GlitchlessGroupConfig.id_to_rank);
+        int newHash = GlitchlessGroupConfig.id_to_rank.hashCode();
         if (lastCacheInvalidateHash == newHash) {
             return;
         }

@@ -1,8 +1,9 @@
 package ru.glitchless.auth.handlers;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import ru.glitchless.auth.GlitchlessAuth;
 import ru.glitchless.auth.tasks.CheckUserTask;
 
@@ -15,7 +16,7 @@ public class LogInHandler {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        executor.execute(new CheckUserTask(event.player));
+        executor.execute(new CheckUserTask((ServerPlayerEntity) event.getPlayer()));
         GlitchlessAuth.getInstance().getUpdateLooper().forceUpdate();
     }
 }

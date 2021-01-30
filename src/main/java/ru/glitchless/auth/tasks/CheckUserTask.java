@@ -1,20 +1,11 @@
 package ru.glitchless.auth.tasks;
 
-import com.feed_the_beast.ftbutilities.ranks.PlayerRank;
-import com.feed_the_beast.ftbutilities.ranks.Rank;
-import com.feed_the_beast.ftbutilities.ranks.Ranks;
+import com.feed_the_beast.mods.ftbranks.api.FTBRanksAPI;
+import com.feed_the_beast.mods.ftbranks.api.Rank;
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
-
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.server.command.TextComponentHelper;
-import okhttp3.OkHttpClient;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.StringTextComponent;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.glitchless.auth.GlitchlessAuth;
@@ -25,7 +16,9 @@ import ru.glitchless.auth.model.UserProfile;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 public class CheckUserTask implements Runnable {
     @SuppressWarnings("UnstableApiUsage")
@@ -33,9 +26,9 @@ public class CheckUserTask implements Runnable {
     }.getType();
     private static final String BASE_URL = "https://games.glitchless.ru/api/minecraft/users/profile/?token=%s&nickname=%s";
     private final GameProfile profile;
-    private final EntityPlayer player;
+    private final ServerPlayerEntity player;
 
-    public CheckUserTask(EntityPlayer player) {
+    public CheckUserTask(ServerPlayerEntity player) {
         this.profile = player.getGameProfile();
         this.player = player;
     }
@@ -61,22 +54,26 @@ public class CheckUserTask implements Runnable {
             GlitchlessAuth.getLogger().error("Not found rank for " + Arrays.toString(groups.toArray()));
             return;
         }
-        final PlayerRank playerRank = Ranks.INSTANCE.getPlayerRank(profile);
 
+        // Sync rank
         final StringBuilder sb = new StringBuilder();
-        playerRank.clearParents();
-
-        playerRank.addParent(rankList.get(0));
+        List<Rank> ranks = FTBRanksAPI.INSTANCE.getManager().getRanks(player);
+        for (Rank rank : ranks) {
+            rank.remove(profile);
+        }
+        rankList.get(0).add(profile);
         sb.append(rankList.get(0));
         for (int i = 1; i < rankList.size(); i++) {
             sb.append(", ");
             final Rank plrRank = rankList.get(i);
-            playerRank.addParent(plrRank);
+            plrRank.add(profile);
             sb.append(plrRank.getId());
         }
 
-        player.sendMessage(new TextComponentString(String.format("Ваши текущие группы: %s", sb.toString())));
-        Ranks.INSTANCE.save();
+        player.sendMessage(new StringTextComponent(String.format("Ваши текущие группы: %s", sb.toString())),
+                player.getUniqueID());
+        FTBRanksAPI.INSTANCE.getManager().saveRanks();
+        FTBRanksAPI.INSTANCE.getManager().savePlayers();
 
         GlitchlessAuth.getLogger().info("Add to user " + profile.getName() + " " + sb);
     }

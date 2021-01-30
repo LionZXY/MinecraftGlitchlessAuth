@@ -1,16 +1,20 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://dist.creeper.host/Sponge/maven" }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
+apply plugin: 'com.matthewprenger.cursegradle'
 apply plugin: 'maven-publish'
 
 version = "1.0.1"
@@ -90,6 +94,8 @@ minecraft {
 repositories {
     jcenter()
     mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven { url = "https://www.cursemaven.com" }
 }
 
 configurations {
@@ -103,6 +109,11 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.0.13'
     embed "com.squareup.okhttp3:okhttp:3.6.0"
+    embed 'com.github.LionZXY:StopChangeFuckingConfig:90e44b4a5c'
+
+
+    compile fg.deobf("curse.maven:ftbranks-314905:3176808")
+    runtimeOnly fg.deobf("curse.maven:ftbessentials-410811:3105205")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
